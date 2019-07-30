@@ -1,5 +1,8 @@
-XBMCnfoMoviesImporter.bundle-for-Plex
+XBMCnfoMusicVideosImporter.bundle-for-Plex
 =====================================
+### Status:
+This has not yet been updated. I have a clone of XBMCnfoMoviesImporter made to work with MusicVideos from a few years ago that I will update to be in sync with latest version of XBMCnfoMoviesImporter then upload. Please do not downlaod this yet.
+
 ### Installation:
 It is recommended to install the [WebTools plugin](http://forums.plex.tv/discussion/288191/webtools-unsupported-appstore/p1).
 
@@ -15,9 +18,9 @@ scroll down and can now easily install the XBMCnfoMoviesImporter.
 ### Manual Installation:
 Not recommended, but possible if you know what you are doing.
 
-1. Download the [zipped bundle](https://github.com/gboudreau/XBMCnfoMoviesImporter.bundle/archive/master.zip) from github,
+1. Download the [zipped bundle](https://github.com/Beemann/XBMCnfoMusicVideosImporter.bundle/archive/master.zip) from github,
 2. extract it,
-3. rename it to **XBMCnfoMoviesImporter.bundle**,
+3. rename it to **XBMCnfoMusicVideosImporter.bundle**,
 4. find the [Plex Media Server data directory](https://support.plex.tv/hc/en-us/articles/202915258-Where-is-the-Plex-Media-Server-data-directory-located)
 5. move the .bundle folder to the Plug-ins directory,
 6. restart plex and test,

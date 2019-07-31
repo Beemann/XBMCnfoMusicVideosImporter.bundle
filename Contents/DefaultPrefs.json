@@ -7,6 +7,12 @@
     "default":"false"
   },
   {
+    "id":"artcol",
+    "label":"Add collection for each artist",
+    "type":"bool",
+    "default":"true"
+  },
+  {
     "id":"dayfirst",
     "label":"Enable day first in ambiguous dates",
     "type":"bool",
@@ -16,7 +22,7 @@
     "id":"plot",
     "label":"Use plot instead of outline\n_____________________________________________________________________________________",
     "type":"bool",
-    "default":"false"
+    "default":"true"
   },
   {
     "id":"localmediaagent",

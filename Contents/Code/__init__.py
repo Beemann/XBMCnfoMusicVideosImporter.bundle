@@ -1,7 +1,7 @@
 # coding=utf-8
 
 """
-XBMCnfoMoviesImporter
+XBMCnfoMusicVideosImporter
 
 spec'd from:
  http://wiki.xbmc.org/index.php?title=Import_-_Export_Library#Video_nfo_Files
@@ -9,6 +9,7 @@ spec'd from:
 CREDITS:
     Original code author: .......... Harley Hooligan
     Modified by: ................... Guillaume Boudreau
+    Modified for music videos: ..... B Kelly
     Eden and Frodo compatibility: .. Jorge Amigo
     Cleanup and some extensions: ... SlrG
     Multipart filter idea: ......... diamondsw
@@ -72,12 +73,12 @@ RATING_REGEX_2 = re.compile(r'\s*\(.*?\)')
 
 class XBMCNFO(PlexAgent):
     """
-    A Plex Metadata Agent for Movies.
+    A Plex Metadata Agent for Music Videos.
 
-    Uses XBMC nfo files as the metadata source for Plex Movies.
+    Uses XBMC nfo files as the metadata source for Plex Music Videos.
     """
-    name = 'XBMCnfoMoviesImporter'
-    ver = '1.1-118-gd7c1999-224'
+    name = 'XBMCnfoMusicVideosImporter'
+    ver = '1.1-118-gd7c1998-224'
     primary_provider = True
     languages = [Locale.Language.NoLanguage]
     accepts_from = [
@@ -149,19 +150,19 @@ class XBMCNFO(PlexAgent):
             # them. This may need to go farther than just &'s....
             nfo_text = NFO_TEXT_REGEX_1.sub('&amp;', nfo_text)
             # remove empty xml tags from nfo
-            log.debug('Removing empty XML tags from movies nfo...')
+            log.debug('Removing empty XML tags from music videos nfo...')
             nfo_text = NFO_TEXT_REGEX_2.sub('', nfo_text)
 
             nfo_text_lower = nfo_text.lower()
-            if nfo_text_lower.count('<movie') > 0 and nfo_text_lower.count('</movie>') > 0:
+            if nfo_text_lower.count('<musicvideo') > 0 and nfo_text_lower.count('</musicvideo>') > 0:
                 # Remove URLs (or other stuff) at the end of the XML file
-                nfo_text = '{content}</movie>'.format(
-                    content=nfo_text.rsplit('</movie>', 1)[0]
+                nfo_text = '{content}</musicvideo>'.format(
+                    content=nfo_text.rsplit('</musicvideo>', 1)[0]
                 )
 
                 # likely an xbmc nfo file
                 try:
-                    nfo_xml = element_from_string(nfo_text).xpath('//movie')[0]
+                    nfo_xml = element_from_string(nfo_text).xpath('//musicvideo')[0]
                 except:
                     log.debug('ERROR: Cant parse XML in {nfo}.'
                               ' Aborting!'.format(nfo=nfo_file))
@@ -198,7 +199,7 @@ class XBMCNFO(PlexAgent):
                         media.id = id
                         log.debug('ID from nfo: {id}'.format(id=media.id))
                 else:
-                    # if movie id doesn't exist, create
+                    # if musicvideo id doesn't exist, create
                     # one based on hash of title and year
                     def ord3(x):
                         return '%.3d' % ord(x)
@@ -209,14 +210,14 @@ class XBMCNFO(PlexAgent):
 
                 results.Append(Metadata(id=media.id, name=media.name, year=media.year, lang=lang, score=100))
                 try:
-                    log.info('Found movie information in NFO file:'
+                    log.info('Found musicvideo information in NFO file:'
                              ' title = {nfo.name},'
                              ' year = {nfo.year},'
                              ' id = {nfo.id}'.format(nfo=media))
                 except:
                     pass
             else:
-                log.info('ERROR: No <movie> tag in {nfo}. Aborting!'.format(
+                log.info('ERROR: No <musicvideo> tag in {nfo}. Aborting!'.format(
                     nfo=nfo_file))
 
 # ##### update Function #####
@@ -355,32 +356,39 @@ class XBMCNFO(PlexAgent):
             nfo_text = NFO_TEXT_REGEX_1.sub(r'&amp;', nfo_text)
 
             # remove empty xml tags from nfo
-            log.debug('Removing empty XML tags from movies nfo...')
+            log.debug('Removing empty XML tags from music videos nfo...')
             nfo_text = NFO_TEXT_REGEX_2.sub('', nfo_text)
 
             nfo_text_lower = nfo_text.lower()
 
-            if nfo_text_lower.count('<movie') > 0 and nfo_text_lower.count('</movie>') > 0:
+            if nfo_text_lower.count('<musicvideo') > 0 and nfo_text_lower.count('</musicvideo>') > 0:
                 # Remove URLs (or other stuff) at the end of the XML file
-                nfo_text = '{content}</movie>'.format(
-                    content=nfo_text.rsplit('</movie>', 1)[0]
+                nfo_text = '{content}</musicvideo>'.format(
+                    content=nfo_text.rsplit('</musicvideo>', 1)[0]
                 )
 
                 # likely an xbmc nfo file
                 try:
-                    nfo_xml = element_from_string(nfo_text).xpath('//movie')[0]
+                    nfo_xml = element_from_string(nfo_text).xpath('//musicvideo')[0]
                 except:
                     log.debug('ERROR: Cant parse XML in {nfo}.'
                               ' Aborting!'.format(nfo=nfo_file))
                     return
 
                 # remove empty xml tags
-                log.debug('Removing empty XML tags from movies nfo...')
+                log.debug('Removing empty XML tags from music videos nfo...')
                 nfo_xml = remove_empty_tags(nfo_xml)
 
+                #BK Artist 
+                try:
+                    artist = nfo_xml.xpath('artist')[0].text.strip()
+                except:
+                    log.debug('ERROR: No <artist> tag in {nfo}.'
+                              ' Aborting!'.format(nfo=nfo_file))
+                    return
                 # Title
                 try:
-                    metadata.title = nfo_xml.xpath('title')[0].text.strip()
+                    metadata.title = artist + ' - ' + nfo_xml.xpath('title')[0].text.strip()
                 except:
                     log.debug('ERROR: No <title> tag in {nfo}.'
                               ' Aborting!'.format(nfo=nfo_file))
@@ -621,9 +629,9 @@ class XBMCNFO(PlexAgent):
                     metadata.rating = nfo_rating
                 else:
                     metadata.rating = nfo_rating
-                # Writers (Credits)
+                #BK Writers (Credits) = album name
                 try:
-                    credits = nfo_xml.xpath('credits')
+                    credits = nfo_xml.xpath('album')
                     metadata.writers.clear()
                     for creditXML in credits:
                         for c in creditXML.text.split('/'):
@@ -681,6 +689,14 @@ class XBMCNFO(PlexAgent):
                 if setname:
                     metadata.collections.add(setname)
                     log.debug('Added Collection from Set tag.')
+                #BK Collections (Artist)
+                if preferences['artcol']:
+                    try:
+                        metadata.collections.add(artist)
+                        log.debug('Added artist to Collection.')
+                    except:
+                        log.debug('Error adding artist to Collection.')
+                        pass
                 # Collections (Tags)
                 try:
                     tags = nfo_xml.xpath('tag')
@@ -708,6 +724,17 @@ class XBMCNFO(PlexAgent):
                 # Actors
                 rroles = []
                 metadata.roles.clear()
+                #BK
+                newrole = metadata.roles.new()
+                try: 
+                    newrole.name = artist
+                except:
+                    newrole.name = 'unknown artist'
+                    pass
+                newrole.role = 'Artist'
+                newrole.photo = os.path.join(folder_path, 'folder.jpg')
+                #BK commented out below
+                """                 
                 for n, actor in enumerate(nfo_xml.xpath('actor')):
                     newrole = metadata.roles.new()
                     try:
@@ -779,7 +806,7 @@ class XBMCNFO(PlexAgent):
                         except:
                             log.debug ('failed setting linked actor photo!')
                             pass
-
+                """
                 if not preferences['localmediaagent']:
                     # Trailer Support
                     # Eden / Frodo
@@ -820,7 +847,7 @@ class XBMCNFO(PlexAgent):
                             subtitles.cleanup_subtitle_entries(part, subtitle_files)
 
                 log.info('---------------------')
-                log.info('Movie nfo Information')
+                log.info('Music video nfo Information')
                 log.info('---------------------')
                 try:
                     log.info('ID: ' + str(metadata.guid))
@@ -899,7 +926,7 @@ class XBMCNFO(PlexAgent):
                 log.info('Actors:')
                 for actor in metadata.roles:
                     try:
-                        log.info('\t{actor.name} > {actor.role}'.format(actor=actor))
+                        log.info('\t{actor.name} > {actor.role} > {actor.photo}'.format(actor=actor))
                     except:
                         try:
                             log.info('\t{actor.name}'.format(actor=actor))
@@ -907,7 +934,7 @@ class XBMCNFO(PlexAgent):
                             log.info('\t-')
                     log.info('---------------------')
             else:
-                log.info('ERROR: No <movie> tag in {nfo}.'
+                log.info('ERROR: No <musicvideo> tag in {nfo}.'
                          ' Aborting!'.format(nfo=nfo_file))
             return metadata
 

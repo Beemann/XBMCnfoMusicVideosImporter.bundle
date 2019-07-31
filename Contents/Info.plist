@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.plexapp.agents.xbmcnfo</string>
+	<string>com.plexapp.agents.xbmcnfomv</string>
 	<key>PlexFrameworkVersion</key>
 	<string>2</string>
 	<key>PlexPluginClass</key>
@@ -13,11 +13,11 @@
 	<key>PlexAgentAttributionText</key>
 	<string>
 <![CDATA[
-XBMCnfoMoviesImporter (V 1.1-118)
+XBMCnfoMusicVideosImporter (V 1.1-118)
 <br /><br />
 is an agent to import the local metadata XBMC creates when you export your library
-to separate files. Movie poster and fanart will be recognized, if they are saved
-alongside your movie in the movies folder. XBMC naming conventions apply. So don't
+to seperate files. Musicvideo poster and fanart will be recognized, if they are saved
+alongside your musicvideos in the musicvideos folder. XBMC naming conventions apply. So don't
 expect it to work, if your naming doesn't follow them.
 ]]>
 	</string>

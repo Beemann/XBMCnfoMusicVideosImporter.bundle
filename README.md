@@ -12,8 +12,8 @@ Clone of XBMCnfoMoviesImporter made to work with MusicVideos. Working.
 6. restart plex and alter plugin settings as required at Server settings->Agents page
 
 ### Usage:
-Create a Plex 'movie' library and set agent = XBMCnfoMusicVideosImporter. Folder should contain music videos with Kodi .nfo files and -poster or -thumb files. I would organise artists into subfolders each containing a poster for the artist stored as folder.jpg. It doesn't currently read in the artist.nfo file.
+Create a Plex 'movie' library and set agent = XBMCnfoMusicVideosImporter. Folder should contain music videos with Kodi .nfo files and -poster or -thumb files. I would organise artists into subfolders each containing a poster for the artist stored as folder.jpg.
 Title is named Artist - Song
-Artist is stored in Plex Actor field (uses local folder.jpg as photo)
-Album is stored stored in Plex Writer field
-Artists are also optionally added as collections (use agent setting to disable)
+Artist is optionally stored in Plex Actor field (uses artist.nfo thumb field url as photo)
+Album is optionally stored stored in Plex Writer field
+Artists are also optionally added as collections (use agent setting to disable adding)

@@ -9,7 +9,7 @@ spec'd from:
 CREDITS:
     Original code author: .......... Harley Hooligan
     Modified by: ................... Guillaume Boudreau
-    Modified for music videos: ..... B Kelly
+    Modified for music videos: ..... Beeman
     Eden and Frodo compatibility: .. Jorge Amigo
     Cleanup and some extensions: ... SlrG
     Multipart filter idea: ......... diamondsw
@@ -324,7 +324,7 @@ class XBMCNFO(PlexAgent):
                     del metadata.art[key]
                 metadata.art[fanart_filename] = MediaProxy(fanart_data)
 
-        #BK open artist.nfo file (to get url to artist thumb)
+        #BM open artist.nfo file (to get url to artist thumb)
         if preferences['artactor']:
             nfo_names = [os.path.join(folder_path, 'artist.nfo')]
             nfo_file = check_file_paths(nfo_names, '.nfo')
@@ -403,7 +403,7 @@ class XBMCNFO(PlexAgent):
                 log.debug('Removing empty XML tags from music videos nfo...')
                 nfo_xml = remove_empty_tags(nfo_xml)
 
-                #BK Artist 
+                #BM Artist 
                 try:
                     artist = nfo_xml.xpath('artist')[0].text.strip()
                 except:
@@ -653,7 +653,7 @@ class XBMCNFO(PlexAgent):
                     metadata.rating = nfo_rating
                 else:
                     metadata.rating = nfo_rating
-                #BK Writers (Credits) = album name
+                #BM Writers (Credits) = album name
                 try:
                     if preferences['albumwriter']:
                         credits = nfo_xml.xpath('album')
@@ -716,7 +716,7 @@ class XBMCNFO(PlexAgent):
                 if setname:
                     metadata.collections.add(setname)
                     log.debug('Added Collection from Set tag.')
-                #BK Collections (Artist)
+                #BM Collections (Artist)
                 if preferences['artcol']:
                     try:
                         metadata.collections.add(artist)
@@ -724,7 +724,7 @@ class XBMCNFO(PlexAgent):
                     except:
                         log.debug('Error adding artist to Collection.')
                         pass
-                # Collections (Tags), BK=tried to add to labels instead but fails!
+                # Collections (Tags), BM=tried to add to labels instead but fails!
                 try:
                     tags = nfo_xml.xpath('tag')
                     [metadata.collections.add(setname_pat.sub('', t.strip())) for tag_xml in tags for t in tag_xml.text.split('/')]
@@ -749,7 +749,7 @@ class XBMCNFO(PlexAgent):
                         log.debug('No Duration in .nfo file.')
                         pass
                         
-                #BK add artist to Actors
+                #BM add artist to Actors
                 if preferences['artactor']:
                     metadata.roles.clear()
                     newrole = metadata.roles.new()

@@ -13,6 +13,18 @@
     "default":"true"
   },
   {
+    "id":"artactor",
+    "label":"Add artist as actor",
+    "type":"bool",
+    "default":"true"
+  },
+  {
+    "id":"albumwriter",
+    "label":"Add album as writer",
+    "type":"bool",
+    "default":"true"
+  },
+  {
     "id":"dayfirst",
     "label":"Enable day first in ambiguous dates",
     "type":"bool",
@@ -110,21 +122,4 @@
     ],
     "default": ""
   },
-  {
-    "id":"athumblocation",
-    "label":"actor thumb location",
-    "type": "enum",
-    "values": [
-      "link",
-      "local",
-      "global"
-    ],
-    "default": "link"
-  },
-  {
-    "id":"athumbpath",
-    "label":"path to movie library or global actor folder",
-    "type":"text",
-    "default":"http://localhost"
-  }
 ]

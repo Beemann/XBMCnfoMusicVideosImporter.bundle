@@ -324,6 +324,29 @@ class XBMCNFO(PlexAgent):
                     del metadata.art[key]
                 metadata.art[fanart_filename] = MediaProxy(fanart_data)
 
+        #BK open artist.nfo file (to get url to artist thumb)
+        if preferences['artactor']:
+            nfo_names = [os.path.join(folder_path, 'artist.nfo')]
+            nfo_file = check_file_paths(nfo_names, '.nfo')
+            if nfo_file:
+                nfo_text = load_file(nfo_file)
+                nfo_text = NFO_TEXT_REGEX_1.sub(r'&amp;', nfo_text)
+                log.debug('Removing empty XML tags from music videos nfo...')
+                nfo_text = NFO_TEXT_REGEX_2.sub('', nfo_text)
+                nfo_text_lower = nfo_text.lower()
+                if nfo_text_lower.count('<artist') > 0 and nfo_text_lower.count('</artist>') > 0:
+                    nfo_text = '{content}</artist>'.format(content=nfo_text.rsplit('</artist>', 1)[0])
+                    try:
+                        artist_nfo_xml = element_from_string(nfo_text).xpath('//artist')[0]
+                        artist_nfo_xml = remove_empty_tags(artist_nfo_xml)                
+                        artist_thumb = artist_nfo_xml.xpath('thumb')[0].text.strip()
+                        #artist_summary = artist_nfo_xml.xpath('biography')[0].text.strip() #dunno how to add this to collection.summary or cast?
+                        log.info('Artist thumb: ' + str(artist_thumb))
+                    except:
+                        pass
+            if not artist_nfo_xml:
+                log.debug('ERROR: Cant parse XML in {nfo}.'.format(nfo=nfo_file))
+                
         nfo_names = [
             # Eden / Frodo
             get_related_file(path1, '.nfo'),
@@ -348,6 +371,7 @@ class XBMCNFO(PlexAgent):
         # check possible .nfo file locations
         nfo_file = check_file_paths(nfo_names, '.nfo')
 
+                
         if nfo_file:
             nfo_text = load_file(nfo_file)
 
@@ -631,7 +655,10 @@ class XBMCNFO(PlexAgent):
                     metadata.rating = nfo_rating
                 #BK Writers (Credits) = album name
                 try:
-                    credits = nfo_xml.xpath('album')
+                    if preferences['albumwriter']:
+                        credits = nfo_xml.xpath('album')
+                    else:
+                        credits = nfo_xml.xpath('credits')
                     metadata.writers.clear()
                     for creditXML in credits:
                         for c in creditXML.text.split('/'):
@@ -697,7 +724,7 @@ class XBMCNFO(PlexAgent):
                     except:
                         log.debug('Error adding artist to Collection.')
                         pass
-                # Collections (Tags)
+                # Collections (Tags), BK=tried to add to labels instead but fails!
                 try:
                     tags = nfo_xml.xpath('tag')
                     [metadata.collections.add(setname_pat.sub('', t.strip())) for tag_xml in tags for t in tag_xml.text.split('/')]
@@ -721,92 +748,19 @@ class XBMCNFO(PlexAgent):
                     except:
                         log.debug('No Duration in .nfo file.')
                         pass
-                # Actors
-                rroles = []
-                metadata.roles.clear()
-                #BK
-                newrole = metadata.roles.new()
-                try: 
-                    newrole.name = artist
-                except:
-                    newrole.name = 'unknown artist'
-                    pass
-                newrole.role = 'Artist'
-                newrole.photo = os.path.join(folder_path, 'folder.jpg')
-                #BK commented out below
-                """                 
-                for n, actor in enumerate(nfo_xml.xpath('actor')):
+                        
+                #BK add artist to Actors
+                if preferences['artactor']:
+                    metadata.roles.clear()
                     newrole = metadata.roles.new()
-                    try:
-                        newrole.name = actor.xpath('name')[0].text
+                    newrole.role = 'Artist'
+                    newrole.name = 'unknown artist'
+                    try: 
+                        newrole.name = artist
+                        newrole.photo = artist_thumb
                     except:
-                        newrole.name = 'Unknown Name ' + str(n)
                         pass
-                    try:
-                        role = actor.xpath('role')[0].text
-                        if role in rroles:
-                            newrole.role = role + ' ' + str(n)
-                        else:
-                            newrole.role = role
-                        rroles.append (newrole.role)
-                    except:
-                        newrole.role = 'Unknown Role ' + str(n)
-                        pass
-                    newrole.photo = ''
-                    athumbloc = preferences['athumblocation']
-                    if athumbloc in ['local','global']:
-                        aname = None
-                        try:
-                            try:
-                                aname = actor.xpath('name')[0].text
-                            except:
-                                pass
-                            if aname:
-                                aimagefilename = aname.replace(' ', '_') + '.jpg'
-                                athumbpath = preferences['athumbpath'].rstrip ('/')
-                                if not athumbpath == '':
-                                    if athumbloc == 'local':
-                                        localpath = os.path.join (folder_path,'.actors',aimagefilename)
-                                        scheme, netloc, path, qs, anchor = urlparse.urlsplit(athumbpath)
-                                        basepath = os.path.basename (path)
-                                        log.debug ('Searching for additional path parts after: ' + basepath)
-                                        searchpos = folder_path.find (basepath)
-                                        addpos = searchpos + len(basepath)
-                                        addpath = os.path.dirname(folder_path)[addpos:]
-                                        if searchpos != -1 and addpath !='':
-                                            log.debug ('Found additional path parts: ' + addpath)
-                                        else:
-                                            addpath = ''
-                                            log.debug ('Found no additional path parts.')
-                                        aimagepath = athumbpath + addpath + '/' + os.path.basename(folder_path) + '/.actors/' + aimagefilename
-                                        if not os.path.isfile(localpath):
-                                            log.debug ('failed setting ' + athumbloc + ' actor photo: ' + aimagepath)
-                                            aimagepath = None
-                                    if athumbloc == 'global':
-                                        aimagepath = athumbpath + '/' + aimagefilename
-                                        scheme, netloc, path, qs, anchor = urlparse.urlsplit(aimagepath)
-                                        path = urllib.quote(path, '/%')
-                                        qs = urllib.quote_plus(qs, ':&=')
-                                        aimagepathurl = urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
-                                        response = urllib.urlopen(aimagepathurl).code
-                                        if not response == 200:
-                                            log.debug ('failed setting ' + athumbloc + ' actor photo: ' + aimagepath)
-                                            aimagepath = None
-                                    if aimagepath:
-                                        newrole.photo = aimagepath
-                                        log.debug ('success setting ' + athumbloc + ' actor photo: ' + aimagepath)
-                        except:
-                            log.debug ('exception setting local or global actor photo!')
-                            log.debug ("Traceback: " + traceback.format_exc())
-                            pass
-                    if athumbloc == 'link' or not newrole.photo:
-                        try:
-                            newrole.photo = actor.xpath('thumb')[0].text
-                            log.debug ('linked actor photo: ' + newrole.photo)
-                        except:
-                            log.debug ('failed setting linked actor photo!')
-                            pass
-                """
+                    
                 if not preferences['localmediaagent']:
                     # Trailer Support
                     # Eden / Frodo

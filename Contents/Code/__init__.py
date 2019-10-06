@@ -71,7 +71,7 @@ RATING_REGEX_1 = re.compile(
 RATING_REGEX_2 = re.compile(r'\s*\(.*?\)')
 
 
-class XBMCNFO(PlexAgent):
+class XBMCNFOMV(PlexAgent):
     """
     A Plex Metadata Agent for Music Videos.
 
@@ -892,7 +892,7 @@ class XBMCNFO(PlexAgent):
                          ' Aborting!'.format(nfo=nfo_file))
             return metadata
 
-xbmcnfo = XBMCNFO
+xbmcnfomv = XBMCNFOMV
 
 # -- LOG ADAPTER -------------------------------------------------------------
 
